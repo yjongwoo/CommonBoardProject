@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CommonBoardProject.iml" filepath="$PROJECT_DIR$/CommonBoardProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/react-boilerplate-main/react-boilerplate-main.iml" filepath="$PROJECT_DIR$/react-boilerplate-main/react-boilerplate-main.iml" />
     </modules>
   </component>
 </project>
