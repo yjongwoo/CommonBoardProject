@@ -9,10 +9,10 @@
     "test": "jest",
     "lint": "npx prettier --write .",
     "clean": "npx rimraf node_modules dist coverage yarn-error.log",
-    "reset": "yarn clean && npx rimraf yarn.lock npm_packages",
-    "postinstall": "husky install"
+    "reset": "yarn clean && npx rimraf yarn.lock npm_packages"
   },
   "dependencies": {
+    "axios": "^0.25.0",
     "react": "17.0.0",
     "react-dom": "17.0.0"
   },
@@ -28,7 +28,6 @@
     "@vitejs/plugin-react": "1.1.0",
     "babel-jest": "27.4.6",
     "chance": "1.1.8",
-    "husky": "7.0.0",
     "jest": "27.4.3",
     "jest-css-modules-transform": "4.3.0",
     "jest-watch-typeahead": "1.0.0",

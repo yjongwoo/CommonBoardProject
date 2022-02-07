@@ -1,64 +1,66 @@
-import { render } from '@testing-library/react'
-import Sample from './components/Sample'
+import { render, waitFor } from '@testing-library/react'
+import App from './App'
+import * as HttpClient from './HttpClient'
 
-jest.mock('./components/Sample')
-
-describe('substituting react component using jest.mock', () => {
-  it('should render app with plain DOM', () => {
-    Sample.mockImplementation(() => <div data-testid="sample">Some Sample</div>)
-    const App = require('./App').default
-
-    const app = render(<App />)
-
-    expect(app.getByText('Some Sample')).toBeInTheDocument()
-    expect(app.getByTestId('sample')).toBeInTheDocument()
+describe('render', () => {
+  let app
+  beforeEach(() => {
+    jest.spyOn(HttpClient, 'get').mockResolvedValue([])
+    app = render(<App />)
   })
 
-  it('should render app with with sample component', () => {
-    const RealSample = jest.requireActual('./components/Sample').default
-    Sample.mockImplementation(() => (
-      <div data-testid="sample2">
-        <RealSample />
-      </div>
-    ))
-    const App = require('./App').default
+  it('shows "자유게시판"', () => {
+    expect(app.getByText('자유게시판')).toBeInTheDocument()
+  })
 
-    const app = render(<App />)
+  it('shows "No", "제목", "글쓴이", "작성시간" as head column', () => {
+    const table = app.container.querySelector('table')
+    expect(table.querySelector('thead > tr')).toBeInTheDocument()
+    const tableHeadings = table.querySelectorAll('th')
+    const tableHeadingTitle = ['No', '제목', '글쓴이', '작성시간']
+    tableHeadingTitle.forEach((title, index) => expect(tableHeadings[index].textContent).toBe(title))
+  })
 
-    expect(app.getByText(/Backend running on/)).toBeInTheDocument()
-    expect(app.getByTestId('sample2')).toBeInTheDocument()
+  it('show "작성된 글이 없습니다" when list empty', () => {
+    const table = app.container.querySelector('table')
+    expect(table.querySelector('tbody > tr > td').textContent).toBe('작성된 글이 없습니다')
   })
 })
 
-xdescribe('substituting react component without using jest.mock', () => {
-  // the following tests should be executed after removing line 4 `jest.mock('./components/Sample')`
-  // this suite does not pass when both tests are executed at the same time
-  // reason: could not find a way to restore mock before each test
-  // related issue: https://github.com/facebook/jest/issues/2649
-  it('should render app with plain DOM', () => {
-    // jest.mock gets hoisted, therefore using require instead of import is key
-    // use doMock before render occurs
-    jest.doMock('./components/Sample', () => () => <div data-testid="sample">Some Sample</div>)
-    const { default: App } = require('./App')
+describe('fetch data', () => {
+  it('renders multiple rows of contents for "No", "제목", "글쓴이", "작성시간"', async () => {
+    const now = 1234567890
+    const now2 = 1234567891
+    jest.spyOn(HttpClient, 'get').mockResolvedValue([
+      {
+        id: 1,
+        title: 'Some title',
+        author: 'Some author',
+        createdAt: now,
+      },
+      {
+        id: 2,
+        title: 'Some title2',
+        author: 'Some author2',
+        createdAt: now2,
+      },
+    ])
 
     const app = render(<App />)
 
-    expect(app.getByText('Some Sample')).toBeInTheDocument()
-    expect(app.getByTestId('sample')).toBeInTheDocument()
-  })
+    await waitFor(() => {
+      expect(HttpClient.get).toHaveBeenCalledTimes(1)
+      expect(app.getByText('1')).toBeInTheDocument()
+      expect(app.getByText('Some title')).toBeInTheDocument()
+      expect(app.getByText('Some author')).toBeInTheDocument()
+      expect(app.getByText(now)).toBeInTheDocument()
 
-  it('should render app with with sample component', () => {
-    const RealSample = jest.requireActual('./components/Sample').default
-    jest.doMock('./components/Sample', () => () => (
-      <div data-testid="sample2">
-        <RealSample />
-      </div>
-    ))
-    const App = require('./App').default
+      expect(app.getByText('2')).toBeInTheDocument()
+      expect(app.getByText('Some title2')).toBeInTheDocument()
+      expect(app.getByText('Some author2')).toBeInTheDocument()
+      expect(app.getByText(now2)).toBeInTheDocument()
 
-    const app = render(<App />)
-
-    expect(app.getByText(/Backend running on/)).toBeInTheDocument()
-    expect(app.getByTestId('sample2')).toBeInTheDocument()
+      expect(app.queryByText('작성된 글이 없습니다')).not.toBeInTheDocument()
+    })
   })
 })

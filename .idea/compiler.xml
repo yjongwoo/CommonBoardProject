@@ -3,8 +3,6 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="BoardBackend" target="11" />
-      <module name="BoardBackend.main" target="11" />
-      <module name="BoardBackend.test" target="11" />
       <module name="com.example.backend" target="11" />
       <module name="com.example.backend.main" target="11" />
       <module name="com.example.backend.test" target="11" />

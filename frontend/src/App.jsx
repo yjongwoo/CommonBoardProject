@@ -1,39 +1,42 @@
-import React, { useState } from 'react'
-import './App.css'
-import Sample from './components/Sample'
+import React, { useEffect, useState } from 'react'
+import * as HttpClient from './HttpClient'
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [result, setResult] = useState([])
+
+  useEffect(() => {
+    HttpClient.get('/posts').then(setResult)
+  }, [])
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src="/assets/logo.svg" className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.jsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-      <Sample />
+    <div>
+      <div>자유게시판</div>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>제목</th>
+            <th>글쓴이</th>
+            <th>작성시간</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result?.length > 0 ? (
+            result.map((record, index) => (
+              <tr key={index}>
+                <td>{record.id}</td>
+                <td>{record.title}</td>
+                <td>{record.author}</td>
+                <td>{record.createdAt}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td>작성된 글이 없습니다</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-### IntelliJ IDEA ###
+.DS_Store
 .idea
 *.iws
 *.iml
@@ -7,6 +7,5 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### VS Code ###
+
 .vscode/
-https://github.com/git-duet/git-duet/issues/99
