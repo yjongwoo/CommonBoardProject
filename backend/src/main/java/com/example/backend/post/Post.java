@@ -1,4 +1,4 @@
-package com.example.backend;
+package com.example.backend.post;
 
 import lombok.Builder;
 import lombok.Getter;

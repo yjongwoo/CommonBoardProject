@@ -1,5 +1,7 @@
-package com.example.backend;
+package com.example.backend.post;
 
+import com.example.backend.post.PostEntity;
+import com.example.backend.post.PostRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

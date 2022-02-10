@@ -1,7 +1,10 @@
-package com.example.backend;
+package com.example.backend.post;
 
+import com.example.backend.post.PostEntity;
+import com.example.backend.post.PostRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.ZonedDateTime;
@@ -13,6 +16,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 @DataJpaTest
 class PostRepositoryTest {
 
+    @Qualifier("postRepository")
     @Autowired
     private PostRepository repository;
 
