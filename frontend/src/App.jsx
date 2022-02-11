@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
-import {BrowserRouter, Route, Router, Routes} from "react-router-dom";
+import {Route, Routes} from "react-router-dom";
 import SignIn from "./SignIn";
 import SignUp from "./SignUp";
+import Board from "./Board";
 
 class App extends Component {
     render() {
@@ -9,7 +10,9 @@ class App extends Component {
             <div>
                 <Routes>
                     <Route exact path='/' element={<SignIn/>}/>
-                    <Route exact path='/signup' element={<SignUp/>}/>
+                    <Route path='/board' element={<Board/>}/>
+                    <Route path='/signup' element={<SignUp/>}/>
+                    <Route path='/signin' element={<SignIn/>}/>
                 </Routes>
             </div>
         )

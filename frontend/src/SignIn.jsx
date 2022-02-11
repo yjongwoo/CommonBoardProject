@@ -1,37 +1,49 @@
 import React, {useState} from "react";
+import * as HttpClient from './HttpClient'
+import {useNavigate} from "react-router";
 
 const SignIn = () => {
-
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [warning, setWarning] = useState('')
+    const navigate = useNavigate()
 
-    const onSubmitHandler = (event) => {
-        console.log('sign in button pressed')
+    const onEmailChange = ({target: {value}}) => setEmail(value)
+
+    const onPasswordChange = ({target: {value}}) => setPassword(value)
+
+    const onClick = (event) => {
+        event.preventDefault()
+
+        const atIndex = email.indexOf('@')
+        const dotIndex = email.indexOf('.')
+        if (atIndex === -1 || dotIndex === -1 || atIndex > dotIndex) {
+            setWarning('Invalid email format')
+            return
+        }
+        if (!password.match(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)) {
+            setWarning('Invalid password format')
+            return
+        }
+        HttpClient.post('/signin', {email, password})
+            .then(response => { navigate('/board') })
+    }
+
+    const onClickSignUp = () => {
+        navigate('/signup')
     }
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                height: '100vh',
-            }}
-        >
-            <form data-testid='signIn-form' style={{ display: 'flex', flexDirection: 'column' }}>
-                <p>Sign In</p>
-                <label>email</label>
-                <input type='email' value={email}/>
-                <label>password</label>
-                <input type='password' value={password}/>
-                <br/>
-                <button data-testid='signIn-button'
-                        type='submit'
-                >Sign in</button>
-                <button data-testid='signup-button'
-                >Sign up</button>
-            </form>
+        <div>
+            <h1>Sign in</h1>
+            <label htmlFor='email'>Email</label>
+            <input id='email' type='text' onChange={onEmailChange}/>
+            <label htmlFor='password'>Password</label>
+            <input id='password' type='password' onChange={onPasswordChange}/>
+
+            <div>{warning}</div>
+            <button type='submit' onClick={(event) => onClick(event)}>Sign in</button>
+            <button type='submit' onClick={onClickSignUp}>Sign up</button>
         </div>
     )
 }

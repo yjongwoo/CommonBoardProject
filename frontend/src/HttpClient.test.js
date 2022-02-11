@@ -12,14 +12,18 @@ describe('httpClient', () => {
     expect(getSpy).toHaveBeenCalledWith('/some_path2')
   })
 
-  it('Calls axios with given parameter when post is called', () => {
-    const postSpy = jest.spyOn(axios, 'post').mockResolvedValue({})
+  it('Calls axios with given parameter when post is called', async () => {
+    const sampleResponse = {key: 'value'}
+    const postParam1 = ['/some_path',{key:'value'}]
+    const data2 = {key2: 'value2'}
+    const postSpy = jest.spyOn(axios, 'post').mockResolvedValue(sampleResponse)
 
-    HttpClient.post('/some_path', {key:'value'})
-    HttpClient.post('/some_path2', {key2: 'value2'})
+    await HttpClient.post(...postParam1)
+    const result = await HttpClient.post('/some_path2', data2)
 
-    expect(postSpy).toHaveBeenCalledWith('/some_path', {key:'value'}, {"headers": {"Authorization": "Bearer token", "Content-Type": "application/json"}})
-    expect(postSpy).toHaveBeenCalledWith('/some_path2', {key2: 'value2'}, {"headers": {"Authorization": "Bearer token", "Content-Type": "application/json"}})
+    expect(postSpy).toHaveBeenCalledWith(...postParam1)
+    expect(postSpy).toHaveBeenCalledWith('/some_path2', data2)
+    expect(result).toEqual(sampleResponse)
   });
 
   it('returns given value when get is called', async () => {

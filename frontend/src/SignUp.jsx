@@ -1,10 +1,13 @@
 import {useState} from "react";
 import * as HttpClient from "./HttpClient";
+import {useNavigate} from "react-router";
 
 const SignUp = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [nickname, setNickname] = useState('')
+    const navigate = useNavigate()
+    // console.log(navigate())
 
     const onEmailHandler = (event) => {
         setEmail(event.currentTarget.value)
@@ -25,7 +28,7 @@ const SignUp = () => {
                 email: email,
                 password: password,
                 nickname: nickname
-            }).then(response => history.push('/'))
+            }).then(() => navigate('/'))
     }
 
     return (
@@ -40,16 +43,15 @@ const SignUp = () => {
         >
             <form data-testid='signup-form' style={{ display: 'flex', flexDirection: 'column' }}>
                 <p>Sign up</p>
-                <label>email</label>
-                <input type='email' value={email} onChange={onEmailHandler}/>
-                <label>password</label>
-                <input type='password' value={password} onChange={onPasswordHandler}/>
-                <label>nickname</label>
-                <input type='text' value={nickname} onChange={onNicknameHandler}/>
+                <label htmlFor='email'>email</label>
+                <input id='email' type='email' value={email} onChange={onEmailHandler}/>
+                <label htmlFor='password'>password</label>
+                <input id='password' type='password' value={password} onChange={onPasswordHandler}/>
+                <label htmlFor='nickname'>nickname</label>
+                <input id = 'nickname' type='text' value={nickname} onChange={onNicknameHandler}/>
                 <br/>
-                <button data-testid='signup-button'
-                        type='submit'
-                        onClick={(event) => onSubmitHandler(event)}
+                <button type='submit'
+                        onClick={onSubmitHandler}
                 >Register</button>
             </form>
         </div>
