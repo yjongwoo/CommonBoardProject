@@ -1,5 +1,5 @@
 import * as HttpClient from './HttpClient'
-import axios, {AxiosStatic} from 'axios'
+import axios, { AxiosStatic } from 'axios'
 
 describe('httpClient', () => {
   it('calls axios with given parameter when get is called', () => {
@@ -13,9 +13,9 @@ describe('httpClient', () => {
   })
 
   it('Calls axios with given parameter when post is called', async () => {
-    const sampleResponse = {key: 'value'}
-    const postParam1 = ['/some_path',{key:'value'}]
-    const data2 = {key2: 'value2'}
+    const sampleResponse = { key: 'value' }
+    const postParam1 = ['/some_path', { key: 'value' }]
+    const data2 = { key2: 'value2' }
     const postSpy = jest.spyOn(axios, 'post').mockResolvedValue(sampleResponse)
 
     await HttpClient.post(...postParam1)
@@ -24,7 +24,7 @@ describe('httpClient', () => {
     expect(postSpy).toHaveBeenCalledWith(...postParam1)
     expect(postSpy).toHaveBeenCalledWith('/some_path2', data2)
     expect(result).toEqual(sampleResponse)
-  });
+  })
 
   it('returns given value when get is called', async () => {
     jest.spyOn(axios, 'get').mockResolvedValue({
