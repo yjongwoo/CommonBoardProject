@@ -4,9 +4,11 @@ import * as HttpClient from './HttpClient'
 
 describe('render', () => {
   let app
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.spyOn(HttpClient, 'get').mockResolvedValue([])
-    app = render(<Board />)
+    await waitFor(() => {
+      app = render(<Board />)
+    })
   })
 
   it('shows "자유게시판"', () => {

@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import * as HttpClient from './HttpClient'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 const SignUp = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
   const navigate = useNavigate()
-  // console.log(navigate())
 
   const onEmailHandler = (event) => {
     setEmail(event.currentTarget.value)
@@ -27,7 +26,9 @@ const SignUp = () => {
       email: email,
       password: password,
       nickname: nickname,
-    }).then(() => navigate('/'))
+    }).then(() => {
+      navigate('/')
+    })
   }
 
   return (
@@ -49,9 +50,7 @@ const SignUp = () => {
         <label htmlFor="nickname">nickname</label>
         <input id="nickname" type="text" value={nickname} onChange={onNicknameHandler} />
         <br />
-        <button type="submit" onClick={onSubmitHandler}>
-          Register
-        </button>
+        <button onClick={onSubmitHandler}>Register</button>
       </form>
     </div>
   )

@@ -1,5 +1,5 @@
 import * as HttpClient from './HttpClient'
-import axios, { AxiosStatic } from 'axios'
+import axios from 'axios'
 
 describe('httpClient', () => {
   it('calls axios with given parameter when get is called', () => {

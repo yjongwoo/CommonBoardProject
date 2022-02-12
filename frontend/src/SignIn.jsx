@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import * as HttpClient from './HttpClient'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 const SignIn = () => {
   const [email, setEmail] = useState('')
@@ -25,7 +25,8 @@ const SignIn = () => {
       setWarning('Invalid password format')
       return
     }
-    HttpClient.post('/signin', { email, password }).then((response) => {
+
+    HttpClient.post('/signin', { email, password }).then(() => {
       navigate('/board')
     })
   }
@@ -43,7 +44,7 @@ const SignIn = () => {
       <input id="password" type="password" onChange={onPasswordChange} />
 
       <div>{warning}</div>
-      <button type="submit" onClick={(event) => onClick(event)}>
+      <button type="submit" onClick={onClick}>
         Sign in
       </button>
       <button type="submit" onClick={onClickSignUp}>

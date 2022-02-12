@@ -1,12 +1,23 @@
-import { fireEvent, render, waitFor } from '@testing-library/react'
+import { fireEvent, prettyDOM, render, waitFor } from '@testing-library/react'
 import SignIn from './SignIn'
 import * as HttpClient from './HttpClient'
-import { HashRouter, MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 
 describe('Sign in page component', () => {
+  beforeEach(() => {
+    jest.mock('react-router-dom', () => ({
+      ...jest.requireActual('react-router-dom'),
+      useNavigate: () => () => {},
+    }))
+  })
+
   it('There are "Sign in" related components in SignIn page', () => {
-    const page = render(<SignIn />)
+    const page = render(
+      <MemoryRouter>
+        <SignIn />
+      </MemoryRouter>
+    )
     const emailInputElement = page.getByLabelText('Email')
     const passwordInputElement = page.getByLabelText('Password')
 
@@ -18,19 +29,29 @@ describe('Sign in page component', () => {
     expect(passwordInputElement.type).toBe('password')
   })
 
-  it('When Sign in button clicked, get request send with email, password', () => {
-    const page = render(<SignIn />)
+  it('When Sign in button clicked, get request send with email, password', async () => {
     const spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
+    const page = render(
+      <MemoryRouter>
+        <SignIn />
+      </MemoryRouter>
+    )
 
     fireEvent.change(page.getByLabelText('Email'), { target: { value: 'email@gmail.com' } })
-    fireEvent.change(page.getByLabelText('Password'), { target: { value: 'somePassword' } })
+    fireEvent.change(page.getByLabelText('Password'), { target: { value: 'somePassword1!' } })
     fireEvent.click(page.getByRole('button', { name: 'Sign in' }))
 
-    expect(spy).toHaveBeenCalledWith('/signin', { email: 'email@gmail.com', password: 'somePassword' })
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith('/signin', { email: 'email@gmail.com', password: 'somePassword1!' })
+    })
   })
 
   it('When email is not email format, fail to sign in', () => {
-    const page = render(<SignIn />)
+    const page = render(
+      <MemoryRouter>
+        <SignIn />
+      </MemoryRouter>
+    )
     const spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
 
     fireEvent.change(page.getByLabelText('Email'), { target: { value: 'email' } })
@@ -44,8 +65,12 @@ describe('Sign in page component', () => {
   describe('password format', () => {
     let page, spy
     beforeEach(() => {
-      page = render(<SignIn />)
       spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
+      page = render(
+        <MemoryRouter>
+          <SignIn />
+        </MemoryRouter>
+      )
 
       fireEvent.change(page.getByLabelText('Email'), { target: { value: 'email@gmail.com' } })
     })
@@ -68,12 +93,13 @@ describe('Sign in page component', () => {
   })
 
   it('When sign in success, route to board page', async () => {
-    const app = render(
-      <HashRouter>
-        <App />
-      </HashRouter>
-    )
+    jest.restoreAllMocks()
     const spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
+    const app = render(
+      <MemoryRouter initialEntries={[{ pathname: '/signin' }]}>
+        <App />
+      </MemoryRouter>
+    )
 
     fireEvent.change(app.getByLabelText('Email'), { target: { value: 'email@gmail.com' } })
     fireEvent.change(app.getByLabelText('Password'), { target: { value: 'aabbA1!s' } })
