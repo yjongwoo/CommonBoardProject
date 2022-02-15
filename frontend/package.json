@@ -26,6 +26,7 @@
     "@rollup/plugin-replace": "3.0.0",
     "@testing-library/jest-dom": "5.16.0",
     "@testing-library/react": "12.1.2",
+    "@testing-library/user-event": "^13.5.0",
     "@vitejs/plugin-react": "1.1.0",
     "babel-jest": "27.4.6",
     "chance": "1.1.8",

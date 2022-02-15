@@ -1,113 +1,100 @@
-import { fireEvent, prettyDOM, render, waitFor } from '@testing-library/react'
-import SignIn from './SignIn'
-import * as HttpClient from './HttpClient'
-import { MemoryRouter } from 'react-router-dom'
-import App from './App'
+import { waitFor } from '@testing-library/react'
+import {
+  changeInputTextByLabel,
+  clickButtonWithText,
+  expectText,
+  getButtonByText,
+  httpPostSpy,
+  renderComponent,
+} from './testUtils'
+
+jest.mock('react-router-dom')
 
 describe('Sign in page component', () => {
-  beforeEach(() => {
-    jest.mock('react-router-dom', () => ({
-      ...jest.requireActual('react-router-dom'),
-      useNavigate: () => () => {},
-    }))
-  })
-
-  it('There are "Sign in" related components in SignIn page', () => {
-    const page = render(
-      <MemoryRouter>
-        <SignIn />
-      </MemoryRouter>
-    )
+  it('render', () => {
+    const page = renderSignIn()
     const emailInputElement = page.getByLabelText('Email')
     const passwordInputElement = page.getByLabelText('Password')
 
     expect(page.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
-    expect(page.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
+    expect(getSignInButton(page)).toBeInTheDocument()
     expect(emailInputElement).toBeInTheDocument()
     expect(passwordInputElement).toBeInTheDocument()
     expect(emailInputElement.type).toBe('text')
     expect(passwordInputElement.type).toBe('password')
   })
 
-  it('When Sign in button clicked, get request send with email, password', async () => {
-    const spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
-    const page = render(
-      <MemoryRouter>
-        <SignIn />
-      </MemoryRouter>
-    )
+  describe('network call', () => {
+    it('send get request on sign in button click', async () => {
+      const { useNavigate } = require('react-router-dom')
+      useNavigate.mockImplementation(() => () => {})
+      const spy = httpPostSpy()
+      const page = renderSignIn(true)
+      const { email, password } = {
+        email: 'email@gmail.com',
+        password: 'somePassword1!',
+      }
 
-    fireEvent.change(page.getByLabelText('Email'), { target: { value: 'email@gmail.com' } })
-    fireEvent.change(page.getByLabelText('Password'), { target: { value: 'somePassword1!' } })
-    fireEvent.click(page.getByRole('button', { name: 'Sign in' }))
+      changeInputTextByLabel(page, 'Email', email)
+      changeInputTextByLabel(page, 'Password', password)
+      clickSignInButton(page)
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith('/signin', { email: 'email@gmail.com', password: 'somePassword1!' })
+      await waitFor(() => expect(spy).toHaveBeenCalledWith('/signin', { email, password }))
     })
   })
 
-  it('When email is not email format, fail to sign in', () => {
-    const page = render(
-      <MemoryRouter>
-        <SignIn />
-      </MemoryRouter>
-    )
-    const spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
-
-    fireEvent.change(page.getByLabelText('Email'), { target: { value: 'email' } })
-    fireEvent.change(page.getByLabelText('Password'), { target: { value: 'somePassword' } })
-    fireEvent.click(page.getByRole('button', { name: 'Sign in' }))
-
-    expect(spy).not.toHaveBeenCalled()
-    expect(page.getByText('Invalid email format')).toBeInTheDocument()
-  })
-
-  describe('password format', () => {
-    let page, spy
+  describe('input verification', () => {
+    let spy, page
     beforeEach(() => {
-      spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
-      page = render(
-        <MemoryRouter>
-          <SignIn />
-        </MemoryRouter>
-      )
-
-      fireEvent.change(page.getByLabelText('Email'), { target: { value: 'email@gmail.com' } })
+      spy = httpPostSpy()
+      page = renderSignIn()
     })
-
-    it('Too short, no special character, no uppercase character, no number', () => {
-      fireEvent.change(page.getByLabelText('Password'), { target: { value: 'aaaa' } })
-      fireEvent.click(page.getByRole('button', { name: 'Sign in' }))
+    it('invalid email format', () => {
+      changeInputTextByLabel(page, 'Email', 'email')
+      changeInputTextByLabel(page, 'Password', 'Password1!')
+      clickSignInButton(page)
 
       expect(spy).not.toHaveBeenCalled()
-      expect(page.getByText('Invalid password format')).toBeInTheDocument()
+      expectText(page, 'Invalid email format')
     })
 
-    it('No special character, no uppercase character', () => {
-      fireEvent.change(page.getByLabelText('Password'), { target: { value: 'aabbcc22' } })
-      fireEvent.click(page.getByRole('button', { name: 'Sign in' }))
+    describe('invalid password format', () => {
+      beforeEach(() => {
+        changeInputTextByLabel(page, 'Email', 'email@gmail.com')
+      })
 
-      expect(spy).not.toHaveBeenCalled()
-      expect(page.getByText('Invalid password format')).toBeInTheDocument()
+      it('Too short, no special character, no uppercase character, no number', () => {
+        changeInputTextByLabel(page, 'Password', 'aaaa')
+        clickSignInButton(page)
+
+        expect(spy).not.toHaveBeenCalled()
+        expectText(page, 'Invalid password format')
+      })
+
+      it('No special character, no uppercase character', () => {
+        changeInputTextByLabel(page, 'Password', 'aabbcc22')
+        clickSignInButton(page)
+
+        expect(spy).not.toHaveBeenCalled()
+        expectText(page, 'Invalid password format')
+      })
     })
   })
 
-  it('When sign in success, route to board page', async () => {
-    jest.restoreAllMocks()
-    const spy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
-    const app = render(
-      <MemoryRouter initialEntries={[{ pathname: '/signin' }]}>
-        <App />
-      </MemoryRouter>
-    )
+  it('move to board page on sign in', async () => {
+    const { useNavigate } = require('react-router-dom')
+    const mockedNavigate = jest.fn()
+    useNavigate.mockImplementation(() => mockedNavigate)
+    httpPostSpy()
+    const page = renderSignIn(true)
 
-    fireEvent.change(app.getByLabelText('Email'), { target: { value: 'email@gmail.com' } })
-    fireEvent.change(app.getByLabelText('Password'), { target: { value: 'aabbA1!s' } })
-    fireEvent.click(app.getByRole('button', { name: 'Sign in' }))
+    changeInputTextByLabel(page, 'Email', 'email@gmail.com')
+    changeInputTextByLabel(page, 'Password', 'aabbA1!s')
+    clickSignInButton(page)
 
-    expect(spy).toHaveBeenCalled()
-    await waitFor(() => {
-      expect(app.getByText('자유게시판')).toBeInTheDocument()
-    })
+    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/board'))
   })
 })
+const renderSignIn = (isWithRouter = false) => renderComponent('./SignIn', isWithRouter)
+const getSignInButton = (page) => getButtonByText(page, 'Sign in')
+const clickSignInButton = (page) => clickButtonWithText(page, 'Sign in')

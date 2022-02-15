@@ -8,47 +8,31 @@ const SignUp = () => {
   const [nickname, setNickname] = useState('')
   const navigate = useNavigate()
 
-  const onEmailHandler = (event) => {
-    setEmail(event.currentTarget.value)
-  }
-
-  const onPasswordHandler = (event) => {
-    setPassword(event.currentTarget.value)
-  }
-
-  const onNicknameHandler = (event) => {
-    setNickname(event.currentTarget.value)
-  }
+  const onEmailHandler = ({ currentTarget: { value } }) => setEmail(value)
+  const onPasswordHandler = ({ currentTarget: { value } }) => setPassword(value)
+  const onNicknameHandler = ({ currentTarget: { value } }) => setNickname(value)
 
   const onSubmitHandler = (event) => {
     event.preventDefault()
     HttpClient.post('/signup', {
-      email: email,
-      password: password,
-      nickname: nickname,
+      email,
+      password,
+      nickname,
     }).then(() => {
       navigate('/')
     })
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100vh',
-      }}
-    >
-      <form data-testid="signup-form" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div>
+      <form>
         <p>Sign up</p>
         <label htmlFor="email">email</label>
-        <input id="email" type="email" value={email} onChange={onEmailHandler} />
+        <input id="email" type="email" onChange={onEmailHandler} />
         <label htmlFor="password">password</label>
-        <input id="password" type="password" value={password} onChange={onPasswordHandler} />
+        <input id="password" type="password" onChange={onPasswordHandler} />
         <label htmlFor="nickname">nickname</label>
-        <input id="nickname" type="text" value={nickname} onChange={onNicknameHandler} />
+        <input id="nickname" type="text" onChange={onNicknameHandler} />
         <br />
         <button onClick={onSubmitHandler}>Register</button>
       </form>

@@ -1,103 +1,82 @@
-import { fireEvent, render, waitFor } from '@testing-library/react'
-import * as HttpClient from './HttpClient'
+import { waitFor } from '@testing-library/react'
+import {
+  changeInputTextByLabel,
+  clickButtonWithText,
+  expectText,
+  getButtonByText,
+  httpPostSpy,
+  renderComponent,
+} from './testUtils'
+
+jest.mock('react-router-dom')
 
 describe('Signup', () => {
-  let getSpy, postSpy
+  let postSpy
+  beforeEach(() => (postSpy = httpPostSpy()))
 
-  beforeEach(() => {
-    getSpy = jest.spyOn(HttpClient, 'get').mockResolvedValue({})
-    postSpy = jest.spyOn(HttpClient, 'post').mockResolvedValue({})
-  })
+  it('render', () => {
+    const page = renderSignUp()
+    const inputTypes = ['email', 'password', 'text']
+    const labelNames = ['email', 'password', 'nickname']
 
-  describe('render', () => {
-    let SignUp, page
-    beforeEach(() => {
-      SignUp = require('./SignUp').default
-      page = render(<SignUp />)
-    })
+    const labelElements = page.container.querySelectorAll('label')
+    const inputElements = page.container.querySelectorAll('input')
 
-    it('There is "Sign up" text', () => {
-      expect(page.getByText('Sign up')).toBeInTheDocument()
-    })
-
-    it('There are email, password, nickname labels and inputs', () => {
-      const inputTypes = ['email', 'password', 'text']
-      const labelNames = ['email', 'password', 'nickname']
-
-      const labelElements = page.container.querySelectorAll('label')
-      const inputElements = page.container.querySelectorAll('input')
-
-      expect(labelElements.length).toBe(3)
-      expect(inputElements.length).toBe(3)
-      labelElements.forEach((labelElement, index) => {
-        expect(labelElement.textContent).toBe(labelNames[index])
-      })
-      inputElements.forEach((inputElement, index) => {
-        expect(inputElement.type).toBe(inputTypes[index])
-      })
-    })
-
-    it('There is sign up button with correct text', () => {
-      expect(page.getByRole('button', { name: 'Register' })).toHaveTextContent('Register')
-    })
+    expectText(page, 'Sign up')
+    expect(labelElements.length).toBe(3)
+    expect(inputElements.length).toBe(3)
+    labelElements.forEach(({ textContent }, index) => expect(textContent).toBe(labelNames[index]))
+    inputElements.forEach(({ type }, index) => expect(type).toBe(inputTypes[index]))
+    expect(getRegisterButton(page)).toBeInTheDocument()
   })
 
   describe('network call', () => {
-    jest.mock('react-router-dom')
     beforeEach(() => {
       const { useNavigate } = require('react-router-dom')
       useNavigate.mockImplementation(() => () => {})
     })
 
-    it('When the register button is pressed, post register request send', async () => {
-      const SignUp = require('./SignUp').default
-      const page = render(<SignUp />)
-      const spy = jest.spyOn(HttpClient, 'post')
+    it('send post register request on register button click', async () => {
+      const page = renderSignUp()
 
-      await waitFor(() => {
-        fireEvent.click(page.getByRole('button', { name: 'Register' }))
-      })
+      await waitFor(() => clickRegisterButton(page))
 
-      expect(spy).toHaveBeenCalled()
+      expect(postSpy).toHaveBeenCalled()
     })
 
-    it('When the register button is pressed, email/password/nickname send to post', () => {
-      const SignUp = require('./SignUp').default
-      const page = render(<SignUp />)
-      const spy = jest.spyOn(HttpClient, 'post')
-      const emailInputElement = page.getByLabelText('email')
-      const passwordInputElement = page.getByLabelText('password')
-      const nicknameInputElement = page.getByLabelText('nickname')
-      const buttonElement = page.getByRole('button', { name: 'Register' })
-
-      fireEvent.change(emailInputElement, { target: { value: 'email@gmail.com' } })
-      fireEvent.change(passwordInputElement, { target: { value: 'somePassword' } })
-      fireEvent.change(nicknameInputElement, { target: { value: 'someNickname' } })
-      fireEvent.click(buttonElement)
-
-      expect(spy).toHaveBeenCalledWith('/signup', {
+    it('send email/password/nickname on register button click', () => {
+      const page = renderSignUp()
+      const { email, nickname, password } = {
         email: 'email@gmail.com',
         nickname: 'someNickname',
         password: 'somePassword',
+      }
+
+      changeInputTextByLabel(page, 'email', email)
+      changeInputTextByLabel(page, 'password', password)
+      changeInputTextByLabel(page, 'nickname', nickname)
+      clickRegisterButton(page)
+
+      expect(postSpy).toHaveBeenCalledWith('/signup', {
+        email,
+        nickname,
+        password,
       })
     })
   })
 
-  it('When the register button is pressed, move to sign in page', async () => {
-    jest.mock('react-router-dom')
-    const { MemoryRouter } = jest.requireActual('react-router-dom')
+  it('move to sign in page on post', async () => {
     const { useNavigate } = require('react-router-dom')
     const mockedNavigate = jest.fn()
     useNavigate.mockImplementation(() => mockedNavigate)
-    const Signup = require('./Signup').default
-    const app = render(
-      <MemoryRouter>
-        <Signup />
-      </MemoryRouter>
-    )
+    const app = renderSignUp(true)
 
-    fireEvent.click(app.getByRole('button', { name: 'Register' }))
+    clickRegisterButton(app)
 
     await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/'))
   })
 })
+
+const renderSignUp = (isWithRouter = false) => renderComponent('./SignUp', isWithRouter)
+const getRegisterButton = (page) => getButtonByText(page, 'Register')
+const clickRegisterButton = (page) => clickButtonWithText(page, 'Register')

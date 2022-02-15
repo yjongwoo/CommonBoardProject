@@ -16,7 +16,7 @@ const SignIn = () => {
     event.preventDefault()
 
     const atIndex = email.indexOf('@')
-    const dotIndex = email.indexOf('.')
+    const dotIndex = email.lastIndexOf('.')
     if (atIndex === -1 || dotIndex === -1 || atIndex > dotIndex) {
       setWarning('Invalid email format')
       return
