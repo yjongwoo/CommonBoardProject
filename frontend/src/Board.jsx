@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import * as HttpClient from './HttpClient'
+import useAxios from "./useAxios";
 
 const Board = () => {
   const [result, setResult] = useState([])
 
+  const {response, error, loading} = useAxios({
+    url: '/posts',
+    method: 'get'
+  })
+
   useEffect(() => {
-    HttpClient.get('/posts').then(setResult)
-  }, [])
+    setResult(response)
+  }, [response, error])
 
   return (
     <div>

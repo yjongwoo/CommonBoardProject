@@ -1,6 +1,8 @@
 import { render, waitFor } from '@testing-library/react'
 import Board from './Board'
 import * as HttpClient from './HttpClient'
+import axios from "axios";
+import useAxios from "./useAxios";
 
 describe('render', () => {
   let app
@@ -33,7 +35,7 @@ describe('fetch data', () => {
   it('renders multiple rows of contents for "No", "제목", "글쓴이", "작성시간"', async () => {
     const now = 1234567890
     const now2 = 1234567891
-    jest.spyOn(HttpClient, 'get').mockResolvedValue([
+    jest.spyOn(axios, 'get').mockResolvedValue({data:[
       {
         id: 1,
         title: 'Some title',
@@ -46,12 +48,15 @@ describe('fetch data', () => {
         author: 'Some author2',
         createdAt: now2,
       },
-    ])
+    ]})
 
     const app = render(<Board />)
 
     await waitFor(() => {
-      expect(HttpClient.get).toHaveBeenCalledTimes(1)
+      expect(axios.get).toHaveBeenCalledTimes(1)
+
+      // expect(app.getByText('데이터를 가져오는데 실패했습니다.')).not.toBeInTheDocument()
+
       expect(app.getByText('1')).toBeInTheDocument()
       expect(app.getByText('Some title')).toBeInTheDocument()
       expect(app.getByText('Some author')).toBeInTheDocument()
@@ -65,4 +70,5 @@ describe('fetch data', () => {
       expect(app.queryByText('작성된 글이 없습니다')).not.toBeInTheDocument()
     })
   })
+
 })

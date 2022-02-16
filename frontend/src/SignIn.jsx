@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import * as HttpClient from './HttpClient'
 import { useNavigate } from 'react-router-dom'
+import useAxios from "./useAxios";
 
 const SignIn = () => {
   const [email, setEmail] = useState('')
@@ -26,10 +27,31 @@ const SignIn = () => {
       return
     }
 
-    HttpClient.post('/signin', { email, password }).then(() => {
-      navigate('/board')
-    })
+    // HttpClient.post('/signin', { email, password }).then(() => {
+    //   navigate('/board')
+    // })
+
+      const { response, loading, error } = useAxios({
+          method: 'post',
+          url: '/posts',
+          headers: JSON.stringify({ accept: '*/*' }),
+          body: JSON.stringify({
+              userId: 1,
+              id: 19392,
+              title: 'title',
+              body: 'Sample text',
+          }),
+      });
+      const [data, setData] = useState([]);
+
+      useEffect(() => {
+          if (response !== null) {
+              setData(response);
+          }
+      }, [response]);
   }
+
+
 
   const onClickSignUp = () => {
     navigate('/signup')
